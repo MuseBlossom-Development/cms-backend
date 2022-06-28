@@ -71,4 +71,55 @@ export class AuthService {
 
     return result;
   }
+
+  // 아이디 중복 확인
+  async userCheck(user_id: string) {
+    const result = {
+      success: true,
+      message: '',
+    };
+    const findUser = await this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.user_id = :user_id', { user_id })
+      .getOne();
+
+    if (findUser) {
+      result.success = false;
+      result.message = '사용할 수 없는 아이디입니다.';
+    }
+
+    return result;
+  }
+
+  //회원가입
+  async signUp(userInfo: SignOut, userCheck?: boolean) {
+    const result = {
+      success: false,
+      message: '',
+    };
+
+    if (!userCheck) {
+      result.message = '아이디 중복 확인을 해주세요.';
+      return result;
+    }
+
+    const findUser = await this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.user_id = :id', { id: userInfo.user_id });
+
+    const pwCheck = userInfo.password === userInfo.passwordCheck ? true : false;
+
+    if (findUser && pwCheck) {
+      try {
+        const user = this.usersRepository.create(userInfo);
+        console.log(user);
+        const addUser = await this.usersRepository.save(user);
+        console.log(addUser);
+      } catch (error) {
+        console.log('error:', error);
+      }
+    }
+
+    return result;
+  }
 }
