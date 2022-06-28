@@ -72,25 +72,6 @@ export class AuthService {
     return result;
   }
 
-  // 아이디 중복 확인
-  async userCheck(user_id: string) {
-    const result = {
-      success: true,
-      message: '',
-    };
-    const findUser = await this.usersRepository
-      .createQueryBuilder('user')
-      .where('user.user_id = :user_id', { user_id })
-      .getOne();
-
-    if (findUser) {
-      result.success = false;
-      result.message = '사용할 수 없는 아이디입니다.';
-    }
-
-    return result;
-  }
-
   //회원가입
   async signUp(userInfo: SignOut, userCheck?: boolean) {
     const result = {
@@ -118,6 +99,25 @@ export class AuthService {
       } catch (error) {
         console.log('error:', error);
       }
+    }
+
+    return result;
+  }
+
+  // 아이디 중복 확인
+  async userCheck(user_id: string) {
+    const result = {
+      success: true,
+      message: '',
+    };
+    const findUser = await this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.user_id = :user_id', { user_id })
+      .getOne();
+
+    if (findUser) {
+      result.success = false;
+      result.message = '사용할 수 없는 아이디입니다.';
     }
 
     return result;
