@@ -6,37 +6,47 @@ import {
   Patch,
   Param,
   Delete,
+  Inject,
+  CACHE_MANAGER,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Cache } from 'cache-manager';
+import { login } from './entities/login.entity';
+import { LoginDTO } from './dto/login.dto';
+import { SignOut } from './dto/signOut.DTO';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly authService: AuthService,
+  ) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Get('cache')
+  async getCache(): Promise<string> {
+    const savedTime = await this.cacheManager.get<number>('time');
+    console.log(savedTime);
+    if (savedTime) {
+      return 'saved time : ' + savedTime;
+    }
+    const now = new Date().getTime();
+    await this.cacheManager.set<number>('time', now, { ttl: 3 });
+    return 'save new time : ' + now;
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('login')
+  async login(@Body() loginInfo: LoginDTO): Promise<login | any> {
+    return await this.authService.signIn(loginInfo);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
+  // @Post('signup')
+  // async signUp(@Body() userInfo: SignOut) {
+  //   let idCheck: boolean;
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
+  //   if (userInfo.idCheck) {
+  //     idCheck = userInfo.idCheck === true ? true : false;
+  //   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
+  //   return await this.authService.signUp(userInfo, idCheck);
+  // }
 }

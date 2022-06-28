@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { DownloadService } from './download.service';
 import { CreateDownloadDto } from './dto/create-download.dto';
 import { UpdateDownloadDto } from './dto/update-download.dto';
@@ -23,7 +31,10 @@ export class DownloadController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDownloadDto: UpdateDownloadDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateDownloadDto: UpdateDownloadDto,
+  ) {
     return this.downloadService.update(+id, updateDownloadDto);
   }
 

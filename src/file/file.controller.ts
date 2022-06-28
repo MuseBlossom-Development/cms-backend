@@ -16,8 +16,8 @@ export class FileController {
   constructor(private readonly fileService: FileService) {}
 
   @Get('')
-  find_directory() {
-    return this.fileService;
+  async find_directory() {
+    return await this.fileService;
   }
 
   @Post()

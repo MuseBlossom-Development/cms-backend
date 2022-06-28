@@ -1,4 +1,5 @@
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -14,6 +15,7 @@ import { Downloads } from './downloads.entity';
 import { Notice } from './notice.entity';
 import { UserInfo } from './userinfo.entity';
 import { Wait } from './wait.entity';
+import * as bcrypt from 'bcrypt';
 
 @Entity()
 @Index(['user_id', 'email'], { unique: true })
@@ -24,8 +26,8 @@ export class Users {
   @Column()
   password: string;
 
-  @Column()
-  tier: number;
+  @Column({ default: 0 })
+  tier?: number;
 
   @Column()
   company_name: string;
@@ -33,11 +35,17 @@ export class Users {
   @Column()
   email: string;
 
-  @Column()
-  subscription: Date;
+  @Column({ default: null })
+  subscription?: Date;
 
   @CreateDateColumn()
-  create_at: Date;
+  create_at?: Date;
+
+  @BeforeInsert()
+  async setPassword(password: string) {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(password || this.password, salt);
+  }
 
   @OneToOne(() => UserInfo, (info) => info.user, { nullable: true })
   @JoinColumn()
