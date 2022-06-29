@@ -2,12 +2,22 @@ import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'error', 'debug'],
-  });
+  const app = await NestFactory.create(AppModule);
+  const config = new DocumentBuilder()
+    .setTitle('CMS API')
+    .setDescription('CMS API 개발')
+    .setVersion('0.0.1')
+    .addTag('CMS')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('api', app, document);
+  app.enableCors();
+  app.use(helmet());
+
   const redis = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
@@ -18,18 +28,6 @@ async function bootstrap() {
     },
   );
   await redis.listen();
-
-  const config = new DocumentBuilder()
-    .setTitle('CMS API')
-    .setDescription('CMS API 개발')
-    .setVersion('0.0.1')
-    .addTag('CMS')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
-
-  app.enableCors();
-
   await app.listen(3000);
 }
 bootstrap();
