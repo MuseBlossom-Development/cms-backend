@@ -8,12 +8,14 @@ import {
   Delete,
   Inject,
   CACHE_MANAGER,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Cache } from 'cache-manager';
 import { login } from './entities/login.entity';
 import { LoginDTO } from './dto/login.dto';
 import { SignOut } from './dto/signOut.DTO';
+import { TokenCheckDTO } from './dto/tokenCheck.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -39,14 +41,23 @@ export class AuthController {
     return await this.authService.signIn(loginInfo);
   }
 
-  // @Post('signup')
-  // async signUp(@Body() userInfo: SignOut) {
-  //   let idCheck: boolean;
+  @Post('signup')
+  async signUp(@Body() userInfo: SignOut) {
+    const idCheck = userInfo.idCheck === true ? true : false;
 
-  //   if (userInfo.idCheck) {
-  //     idCheck = userInfo.idCheck === true ? true : false;
-  //   }
+    return await this.authService.signUp(userInfo, idCheck);
+  }
 
-  //   return await this.authService.signUp(userInfo, idCheck);
-  // }
+  @Post()
+  async tokenCheck(@Body() token: TokenCheckDTO) {
+    return await this.authService.tokenCheck(
+      token.accessToken,
+      token.refreshToken,
+    );
+  }
+
+  @Get()
+  async validCheck(@Query('type') type: string, @Query('value') value: string) {
+    return await this.authService.validCheck(type, value);
+  }
 }

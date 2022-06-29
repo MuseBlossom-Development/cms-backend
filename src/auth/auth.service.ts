@@ -67,8 +67,10 @@ export class AuthService {
 
     if (!result.success) {
       result.message = 'id 또는 password가 일치하지 않습니다.';
+      return result;
     }
 
+    result.message = 'online';
     return result;
   }
 
@@ -106,20 +108,68 @@ export class AuthService {
 
   // 아이디 중복 확인
   async userCheck(user_id: string) {
-    const result = {
-      success: true,
-      message: '',
-    };
     const findUser = await this.usersRepository
       .createQueryBuilder('user')
       .where('user.user_id = :user_id', { user_id })
       .getOne();
 
     if (findUser) {
-      result.success = false;
-      result.message = '사용할 수 없는 아이디입니다.';
+      return false;
     }
 
+    return true;
+  }
+
+  // email 중복 확인
+  async emailCheck(email: string) {
+    return true;
+  }
+
+  // 사업자등록 번호 확인
+  async comCheck(com: number) {
+    return true;
+  }
+
+  // 토큰 유효성 검사
+  async tokenCheck(access, refresh) {
+    return;
+  }
+
+  // 중복, 유효성 인증 검사
+  async validCheck(checkType: string, value: string) {
+    const result = {
+      status: 200,
+      success: false,
+      message: '',
+    };
+    const types = checkType.toString();
+    let truthy: boolean;
+
+    switch (types) {
+      case 'id':
+        truthy = await this.userCheck(value);
+        if (truthy) {
+          result.success = true;
+          result.message = '사용 가능한 아이디입니다.';
+        } else {
+          result.message = '사용 가능하지 않은 아이디입니다.';
+        }
+        break;
+
+      case 'com':
+        truthy = await this.comCheck(+value);
+        break;
+
+      case 'email':
+        truthy = await this.emailCheck(value);
+        break;
+
+      default:
+        result.message = 'type not selected';
+        break;
+    }
+
+    console.log(result);
     return result;
   }
 }
