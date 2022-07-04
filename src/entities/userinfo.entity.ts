@@ -1,10 +1,20 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Users } from './Users.entity';
 
 @Entity()
 export class UserInfo {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   info_id: number;
+
+  @OneToOne(() => Users)
+  @JoinColumn()
+  user_id: Users;
 
   @Column()
   manager: string;
@@ -23,7 +33,4 @@ export class UserInfo {
 
   @Column()
   document: string;
-
-  @OneToOne(() => Users, (user) => user.user_id)
-  user: Users;
 }

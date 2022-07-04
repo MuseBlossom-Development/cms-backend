@@ -4,16 +4,11 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  JoinColumn,
-  JoinTable,
-  ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 import { Downloads } from './downloads.entity';
 import { Notice } from './notice.entity';
-import { UserInfo } from './userinfo.entity';
 import { Wait } from './wait.entity';
 import * as bcrypt from 'bcrypt';
 
@@ -23,7 +18,7 @@ export class Users {
   @PrimaryColumn()
   user_id: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 70 })
   password: string;
 
   @Column({ default: 0 })
@@ -46,10 +41,6 @@ export class Users {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(password || this.password, salt);
   }
-
-  @OneToOne(() => UserInfo, (info) => info.user, { nullable: true })
-  @JoinColumn()
-  userinfo: UserInfo;
 
   @OneToMany(() => Notice, (notice) => notice.user_id)
   notice: Notice[];
