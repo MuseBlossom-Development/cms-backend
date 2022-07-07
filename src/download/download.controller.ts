@@ -14,32 +14,4 @@ import { UpdateDownloadDto } from './dto/update-download.dto';
 @Controller('download')
 export class DownloadController {
   constructor(private readonly downloadService: DownloadService) {}
-
-  @Post()
-  create(@Body() createDownloadDto: CreateDownloadDto) {
-    return this.downloadService.create(createDownloadDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.downloadService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.downloadService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateDownloadDto: UpdateDownloadDto,
-  ) {
-    return this.downloadService.update(+id, updateDownloadDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.downloadService.remove(+id);
-  }
 }
