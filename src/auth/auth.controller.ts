@@ -14,7 +14,7 @@ import { AuthService } from './auth.service';
 import { Cache } from 'cache-manager';
 import { login } from './entities/login.entity';
 import { LoginDTO } from './dto/login.dto';
-import { SignOut } from './dto/signOut.DTO';
+import { SignupDTO } from './dto/signOut.DTO';
 import { TokenCheckDTO } from './dto/tokenCheck.dto';
 
 @Controller('auth')
@@ -36,18 +36,21 @@ export class AuthController {
     return 'save new time : ' + now;
   }
 
+  //로그인
   @Post('login')
   async login(@Body() loginInfo: LoginDTO): Promise<login | any> {
     return await this.authService.signIn(loginInfo);
   }
 
+  // 회원가입
   @Post('signup')
-  async signUp(@Body() userInfo: SignOut) {
-    const idCheck = userInfo.idCheck === true ? true : false;
+  async signUp(@Body() userInfo: SignupDTO, @Query('idCheck') idCheck: string) {
+    const Check = idCheck === 'true' ? true : false;
 
-    return await this.authService.signUp(userInfo, idCheck);
+    return await this.authService.signUp(userInfo, Check);
   }
 
+  // 로그인 확인
   @Post()
   async tokenCheck(@Body() token: TokenCheckDTO) {
     return await this.authService.tokenCheck(
@@ -56,8 +59,13 @@ export class AuthController {
     );
   }
 
+  // 중복, 인증
   @Get()
-  async validCheck(@Query('type') type: string, @Query('value') value: string) {
-    return await this.authService.validCheck(type, value);
+  async validCheck(
+    @Query('type') type: string,
+    @Query('val') val: string,
+    @Query('val2') val2: string,
+  ) {
+    return await this.authService.validCheck(type, val, val2);
   }
 }

@@ -1,6 +1,6 @@
 import { IsAlphanumeric, IsBoolean, IsEmail, Length } from 'class-validator';
 
-export class SignOut {
+export class SignupDTO {
   @IsAlphanumeric()
   user_id: string;
 
@@ -16,7 +16,4 @@ export class SignOut {
 
   @IsEmail()
   email: string;
-
-  @IsBoolean()
-  idCheck?: boolean;
 }
