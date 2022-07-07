@@ -14,7 +14,7 @@ import { AuthService } from './auth.service';
 import { Cache } from 'cache-manager';
 import { login } from './entities/login.entity';
 import { LoginDTO } from './dto/login.dto';
-import { SignupDTO } from './dto/signOut.DTO';
+import { SignOutDTO } from 'src/auth/dto/signout.DTO';
 import { TokenCheckDTO } from './dto/tokenCheck.dto';
 
 @Controller('auth')
@@ -43,8 +43,11 @@ export class AuthController {
   }
 
   // 회원가입
-  @Post('signup')
-  async signUp(@Body() userInfo: SignupDTO, @Query('idCheck') idCheck: string) {
+  @Post('signout')
+  async signUp(
+    @Body() userInfo: SignOutDTO,
+    @Query('idCheck') idCheck: string,
+  ) {
     const Check = idCheck === 'true' ? true : false;
 
     return await this.authService.signUp(userInfo, Check);

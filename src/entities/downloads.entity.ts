@@ -5,7 +5,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Files } from './files.entity';
-import { Users } from './Users.entity';
+import { Users } from './users.entity';
 
 @Entity()
 export class Downloads {

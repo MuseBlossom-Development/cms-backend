@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from 'src/entities/Users.entity';
+import { Users } from './../entities/users.entity';
 import { Repository } from 'typeorm';
 import { LoginDTO } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { SignupDTO } from './dto/signOut.DTO';
+import { SignOutDTO } from './dto/signout.DTO';
 import { HttpService } from '@nestjs/axios';
 
 @Injectable()
@@ -75,7 +75,7 @@ export class AuthService {
   }
 
   //회원가입
-  async signUp(userInfo: SignupDTO, userCheck?: boolean) {
+  async signUp(userInfo: SignOutDTO, userCheck?: boolean) {
     const result = {
       statusCode: 201,
       success: false,
