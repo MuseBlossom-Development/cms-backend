@@ -35,22 +35,22 @@ export class Files {
   @Column()
   file_type: string;
 
-  @Column()
+  @Column({ default: null })
   purpose: string;
 
-  @Column()
+  @Column({ default: null })
   mood: string;
 
-  @Column()
+  @Column({ default: null })
   genre: string;
 
-  @Column()
+  @Column({ default: null })
   category1: string;
 
-  @Column()
+  @Column({ default: null })
   category2: string;
 
-  @Column()
+  @Column({ default: null })
   category3: string;
 
   @CreateDateColumn()
