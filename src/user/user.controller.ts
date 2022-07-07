@@ -30,7 +30,7 @@ export class UserController {
     return await this.userService.userInfoUpDate(id, update);
   }
 
-  @Get()
+  @Get('list')
   async getUsers(@Query('grade') tier: string) {
     return await this.userService.getUsers(+tier);
   }
