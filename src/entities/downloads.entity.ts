@@ -12,8 +12,8 @@ export class Downloads {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   d_id: number;
 
-  @ManyToOne(() => Users, (user) => user.down)
-  user_id: Users;
+  @ManyToOne(() => Users, (user) => user.download)
+  user: Users;
 
   @ManyToOne(() => Files, (file) => file.down)
   file_id: number;

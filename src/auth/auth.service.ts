@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from './../entities/users.entity';
 import { Repository } from 'typeorm';
 import { LoginDTO } from './dto/login.dto';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignOutDTO } from './dto/signout.DTO';
 import { HttpService } from '@nestjs/axios';
+import { createHmac } from 'crypto';
+import { Users } from 'src/entities/users.entity';
 
 @Injectable()
 export class AuthService {
@@ -32,12 +32,14 @@ export class AuthService {
         .where('user.user_id=:id', { id: loginInfo.id })
         .getOne();
 
-      // const salt = await bcrypt.genSalt();
-      // const password = await bcrypt.hash('aaaa', salt);
-      // console.log(password);
-
       if (user !== null) {
-        const truthy = await bcrypt.compare(loginInfo.password, user.password);
+        // const truthy = await bcrypt.compare(loginInfo.password, user.password);
+        const truthy =
+          createHmac('sha256', process.env.PW_SECRET_KEY)
+            .update(loginInfo.password)
+            .digest('hex') === user.password
+            ? true
+            : false;
 
         result.success = truthy;
 

@@ -4,13 +4,13 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
   OneToMany,
   PrimaryColumn,
 } from 'typeorm';
 import { Downloads } from './downloads.entity';
 import { Notice } from './notice.entity';
-import { Wait } from './wait.entity';
-import * as bcrypt from 'bcrypt';
+import { createHmac } from 'crypto';
 
 @Entity()
 @Index(['user_id', 'email'], { unique: true })
@@ -38,16 +38,14 @@ export class Users {
 
   @BeforeInsert()
   async setPassword(password: string) {
-    const salt = await bcrypt.genSalt();
-    this.password = await bcrypt.hash(password || this.password, salt);
+    this.password = createHmac('sha256', process.env.PW_SECRET_KEY)
+      .update(password || this.password)
+      .digest('hex');
   }
 
-  @OneToMany(() => Notice, (notice) => notice.user_id)
+  @OneToMany(() => Notice, (notice) => notice.user)
   notice: Notice[];
 
-  @OneToMany(() => Wait, (wait) => wait.user_id)
-  wait: Wait[];
-
-  @OneToMany(() => Downloads, (down) => down.user_id)
-  down: Downloads[];
+  @OneToMany(() => Downloads, (download) => download.user)
+  download: Downloads[];
 }

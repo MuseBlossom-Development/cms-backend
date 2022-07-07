@@ -9,8 +9,15 @@ import { FileModule } from './file/file.module';
 import { DownloadModule } from './download/download.module';
 import { UploadModule } from './upload/upload.module';
 import { ConfigModule } from '@nestjs/config';
-
+import { Users } from 'src/entities/users.entity';
+import { Directory } from 'src/entities/directory.entity';
+import { Downloads } from 'src/entities/downloads.entity';
+import { Files } from 'src/entities/files.entity';
+import { Notice } from 'src/entities/notice.entity';
+import { UserInfo } from 'src/entities/userinfo.entity';
+import { Wait } from 'src/entities/wait.entity';
 import { Inquires } from './entities/inquires.entity';
+import { UserView } from 'src/entities/userView.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import mongoose from 'mongoose';
@@ -26,7 +33,16 @@ import mongoose from 'mongoose';
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE,
-        entities: ['dist/entities/*.entity{.ts,.js}'],
+        entities: [
+          Users,
+          Directory,
+          Downloads,
+          Files,
+          Notice,
+          UserInfo,
+          Wait,
+          UserView,
+        ],
         synchronize: true,
       }),
     }),

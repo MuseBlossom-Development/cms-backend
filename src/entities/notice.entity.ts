@@ -6,16 +6,15 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from './Users.entity';
+import { Users } from './users.entity';
 
 @Entity()
 export class Notice {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   notice_no: number;
 
-  @ManyToOne(() => Users, (user) => user.notice)
-  @JoinColumn()
-  user_id: Users;
+  @ManyToOne((type) => Users, (user) => user.notice)
+  user: Users;
 
   @Column()
   notice_key: string;

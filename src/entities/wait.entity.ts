@@ -6,18 +6,17 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Files } from './files.entity';
-import { Users } from './Users.entity';
+import { Users } from './users.entity';
 
 @Entity()
 export class Wait {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   wait_no: number;
 
-  @OneToOne(() => Users, (user) => user.wait)
+  @OneToOne(() => Users)
   @JoinColumn()
-  user_id: Users;
+  user: Users;
 
   @ManyToOne(() => Files, (file) => file.wait)
-  @JoinColumn()
   file_id: Files[];
 }

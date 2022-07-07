@@ -3,9 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   Inject,
   CACHE_MANAGER,
   Query,
@@ -49,7 +46,7 @@ export class AuthController {
     @Query('idCheck') idCheck: string,
   ) {
     const Check = idCheck === 'true' ? true : false;
-
+    console.log(userInfo);
     return await this.authService.signUp(userInfo, Check);
   }
 
