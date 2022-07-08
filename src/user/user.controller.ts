@@ -16,11 +16,13 @@ import { UserInfoUpdateDTO } from './dto/userInfoUpdata.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // 계약
   @Post('accept')
   async acceptContract(@Body() contractInfo: ContractInfoDTO) {
     return await this.userService.acceptContract(contractInfo);
   }
 
+  // 유저 정보 업데이트
   @Patch('update')
   async userInfoUpDate(
     @Query('id') id: string,
@@ -28,10 +30,5 @@ export class UserController {
   ) {
     // console.log(id, updata);
     return await this.userService.userInfoUpDate(id, update);
-  }
-
-  @Get('list')
-  async getUsers(@Query('grade') tier: string) {
-    return await this.userService.getUsers(+tier);
   }
 }

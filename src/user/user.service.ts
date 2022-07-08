@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/entities/userinfo.entity';
-import { Users } from 'src/entities/Users.entity';
+import { Users } from 'src/entities/users.entity';
 import { Repository } from 'typeorm';
 import { ContractInfoDTO } from './dto/contractInfo.dto';
 import { UserInfoUpdateDTO } from './dto/userInfoUpdata.dto';
