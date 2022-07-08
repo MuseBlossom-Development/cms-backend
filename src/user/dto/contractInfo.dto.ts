@@ -1,5 +1,5 @@
 import { IsAlpha, IsAlphanumeric, IsNumber, IsString } from 'class-validator';
-import { Users } from 'src/entities/Users.entity';
+import { Users } from 'src/entities/users.entity';
 
 export class ContractInfoDTO {
   user_id: Users;
