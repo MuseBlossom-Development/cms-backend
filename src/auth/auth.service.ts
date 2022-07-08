@@ -132,7 +132,7 @@ export class AuthService {
     const findEmail = await this.usersRepository
       .createQueryBuilder()
       .select('email')
-      .where('email = :check', { check: this.emailCheck });
+      .where('email = :check', { check: email });
 
     if (findEmail) return false;
 
@@ -145,12 +145,24 @@ export class AuthService {
   }
 
   // 사업자등록 번호 확인
-  async comCheck(com: string, value: string) {
-    const val: string[] = value.split(',');
-    const name = val[0];
-    const date = val[1];
+  async comCheck(value: Array<string>) {
+    let result: boolean;
+    const com = value[0];
+    const name = value[1];
+    const date = value[2];
     const data = {
-      b_no: [com],
+      businesses: [
+        {
+          b_no: com,
+          start_dt: date,
+          p_nm: name,
+          p_nm2: '',
+          b_nm: '',
+          corp_no: '',
+          b_sector: '',
+          b_type: '',
+        },
+      ],
     };
     try {
       const comInfo = await this.httpService.axiosRef.post(
@@ -158,21 +170,30 @@ export class AuthService {
         data,
       );
 
-      console.log('ok', comInfo);
+      // console.log('ok', comInfo.data.data[0]);
+      const reData = comInfo.data.data[0];
+
+      if (reData.valid === '02') {
+        result = false;
+      } else {
+        result = true;
+      }
     } catch (error) {
-      console.log('error', error);
+      console.log('errorComCheck', error);
     }
 
-    return true;
+    return result;
   }
 
-  // 토큰 유효성 검사
+  // 토큰 유효성 검사 (임시)
   async tokenCheck(access, refresh) {
+    const secret = process.env.PW_SECRET_KEY;
+    const refreshVerify = this.jwtService.decode(refresh);
     return;
   }
 
   // 중복, 유효성 인증 검사
-  async validCheck(checkType: string, value: string, value2?: string) {
+  async validCheck(checkType: string, value: any) {
     const result = {
       status: 200,
       success: false,
@@ -184,16 +205,20 @@ export class AuthService {
     switch (types) {
       case 'id':
         truthy = await this.userCheck(value);
-        if (truthy) {
-          result.success = true;
-          result.message = '사용 가능한 아이디입니다.';
-        } else {
-          result.message = '사용 가능하지 않은 아이디입니다.';
-        }
+        result.success = truthy;
+        result.message =
+          truthy === true
+            ? '사용 가능한 아이디입니다.'
+            : '사용 가능하지 않은 아이디입니다.';
         break;
 
       case 'com':
-        truthy = await this.comCheck(value, value2);
+        truthy = await this.comCheck(value);
+        result.success = truthy;
+        result.message =
+          truthy === true
+            ? '확인되었습니다.'
+            : '사업자등록번호 또는 성명, 개업일자가 맞지 않아 확인할 수 없습니다.';
         break;
 
       case 'email':

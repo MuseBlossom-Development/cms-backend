@@ -61,11 +61,7 @@ export class AuthController {
 
   // 중복, 인증
   @Get()
-  async validCheck(
-    @Query('type') type: string,
-    @Query('val') val: string,
-    @Query('val2') val2: string,
-  ) {
-    return await this.authService.validCheck(type, val, val2);
+  async validCheck(@Body() auth: any) {
+    return await this.authService.validCheck(auth.type, auth.val);
   }
 }
