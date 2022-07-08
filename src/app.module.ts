@@ -20,6 +20,7 @@ import { Inquires } from './entities/inquires.entity';
 import { UserView } from 'src/entities/userView.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { AdminModule } from './admin/admin.module';
 import mongoose from 'mongoose';
 
 @Module({
@@ -62,6 +63,7 @@ import mongoose from 'mongoose';
     DownloadModule,
     UploadModule,
     Inquires,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
