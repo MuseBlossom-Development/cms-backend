@@ -51,7 +51,7 @@ export class AuthController {
   }
 
   // 로그인 확인
-  @Post()
+  @Post('token')
   async tokenCheck(@Body() token: TokenCheckDTO) {
     return await this.authService.tokenCheck(
       token.accessToken,
@@ -62,6 +62,7 @@ export class AuthController {
   // 중복, 인증
   @Post()
   async validCheck(@Body() auth: any) {
+    console.log('body', auth);
     return await this.authService.validCheck(auth.type, auth.val);
   }
 }
