@@ -60,7 +60,7 @@ export class AuthController {
   }
 
   // 중복, 인증
-  @Get()
+  @Post()
   async validCheck(@Body() auth: any) {
     return await this.authService.validCheck(auth.type, auth.val);
   }
