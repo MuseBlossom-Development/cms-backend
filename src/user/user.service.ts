@@ -5,6 +5,7 @@ import { Users } from 'src/entities/users.entity';
 import { Repository } from 'typeorm';
 import { ContractInfoDTO } from './dto/contractInfo.dto';
 import { UserInfoUpdateDTO } from './dto/userInfoUpdata.dto';
+import { ErrorResponse } from 'src/common/error/ErrorResponse';
 
 @Injectable()
 export class UserService {
@@ -12,6 +13,7 @@ export class UserService {
     @InjectRepository(Users) private usersRepository: Repository<Users>,
     @InjectRepository(UserInfo)
     private userInfoRepository: Repository<UserInfo>,
+    private readonly errorResponse: ErrorResponse,
   ) {}
 
   // 계약 진행 전 회사 정보 입력
@@ -19,7 +21,7 @@ export class UserService {
     const result = {
       status: 201,
       success: true,
-      message: '',
+      message: '정보 입력이 완료되었습니다.',
     };
 
     try {
@@ -30,9 +32,7 @@ export class UserService {
     } catch (error) {
       console.log(error);
 
-      result.message = '';
-      result.status = 504;
-      result.success = false;
+      this.errorResponse.Internal_Server();
     }
 
     return result;

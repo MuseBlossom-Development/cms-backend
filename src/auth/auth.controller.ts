@@ -6,6 +6,7 @@ import {
   Inject,
   CACHE_MANAGER,
   Query,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Cache } from 'cache-manager';
@@ -35,6 +36,7 @@ export class AuthController {
 
   //로그인
   @Post('login')
+  @HttpCode(200)
   async login(@Body() loginInfo: LoginDTO): Promise<login | any> {
     return await this.authService.signIn(loginInfo);
   }
@@ -61,8 +63,15 @@ export class AuthController {
 
   // 중복, 인증
   @Post()
+  @HttpCode(200)
   async validCheck(@Body() auth: any) {
     console.log('body', auth);
     return await this.authService.validCheck(auth.type, auth.val);
+  }
+
+  @Post('email')
+  @HttpCode(200)
+  async createMailAuth(@Body() auth: any) {
+    return await this.authService.createMailAuth(auth.email, auth.name);
   }
 }

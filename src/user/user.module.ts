@@ -6,10 +6,11 @@ import { Users } from 'src/entities/users.entity';
 import { UserInfo } from 'src/entities/userinfo.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserView } from 'src/entities/userView.entity';
+import { ErrorResponse } from 'src/common/error/ErrorResponse';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Users, UserInfo, UserView]), AuthModule],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, ErrorResponse],
 })
 export class UserModule {}
