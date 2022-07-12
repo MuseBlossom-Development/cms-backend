@@ -16,11 +16,13 @@ import { Files } from 'src/entities/files.entity';
 import { Notice } from 'src/entities/notice.entity';
 import { UserInfo } from 'src/entities/userinfo.entity';
 import { Wait } from 'src/entities/wait.entity';
-import { Inquires } from './entities/inquires.entity';
+import { Help } from 'src/entities/help.entity';
 import { UserView } from 'src/entities/userView.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { AdminModule } from './admin/admin.module';
+import { HelpModule } from './help/help.module';
+import { MailModule } from './mail/mail.module';
 import mongoose from 'mongoose';
 
 @Module({
@@ -43,6 +45,7 @@ import mongoose from 'mongoose';
           UserInfo,
           Wait,
           UserView,
+          Help,
         ],
         synchronize: true,
       }),
@@ -62,8 +65,10 @@ import mongoose from 'mongoose';
     FileModule,
     DownloadModule,
     UploadModule,
-    Inquires,
+    Help,
     AdminModule,
+    HelpModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

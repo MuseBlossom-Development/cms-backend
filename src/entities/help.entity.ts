@@ -8,7 +8,7 @@ import {
 
 @Entity()
 @Index(['res_com'], { unique: false })
-export class Inquires {
+export class Help {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   inq_no: number;
 
