@@ -9,6 +9,9 @@ import { createHmac } from 'crypto';
 import { Users } from 'src/entities/users.entity';
 import { ErrorResponse } from 'src/common/error/ErrorResponse';
 import { MailService } from 'src/mail/mail.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { Email, EmailDocument } from 'src/schemas/email.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +21,7 @@ export class AuthService {
     private readonly httpService: HttpService,
     private readonly errorResponse: ErrorResponse,
     @Inject(MailService) private mailService: MailService,
+    @InjectModel(Email.name) private emailModel: Model<EmailDocument>,
   ) {}
 
   // 로그인
@@ -126,20 +130,45 @@ export class AuthService {
     return true;
   }
 
-  // email 중복 확인 / 이메일 인증
+  // email 중복 확인
   async emailCheck(email: string) {
-    const findEmail = await this.usersRepository
-      .createQueryBuilder()
-      .select('email')
-      .where('email = :check', { check: email });
-
-    if (findEmail) return false;
     try {
-    } catch (error) {
-      console.log(error);
-    }
+      const findEmail = await this.usersRepository
+        .createQueryBuilder()
+        .select('email')
+        .where('email = :check', { check: email })
+        .getOne();
 
-    return true;
+      if (findEmail !== null) return false;
+      else return true;
+    } catch (error) {
+      return true;
+    }
+  }
+
+  // 이메일 인증 코드 검사
+  async emailAuthCheck(email: string, num: string) {
+    const result = {
+      status: 200,
+      message: '',
+      success: true,
+    };
+    try {
+      const findMailAuth = await this.emailModel.findOne({ email });
+
+      result.success = findMailAuth.auth_num === num ? true : false;
+      result.message =
+        findMailAuth.auth_num === num
+          ? '인증이 완료됐습니다.'
+          : '다시 시도해 주세요';
+      return result;
+    } catch (error) {
+      console.log('error:', error);
+
+      this.errorResponse.BadRequest(
+        '인증시간이 초과되었습니다. 다시 시도해 주세요',
+      );
+    }
   }
 
   // 사업자등록 번호 확인
@@ -240,11 +269,23 @@ export class AuthService {
     return result;
   }
 
+  // 인증 메일 보내기
   async createMailAuth(email: any, name: string) {
     const result = {
       status: 200,
       success: await this.mailService.createAuthNum(email, name),
     };
+
+    setTimeout(async () => {
+      console.log('이메일 인증 확인');
+      try {
+        const findAuth = await this.emailModel.findOne({ email });
+        if (findAuth) {
+          const deleteAuth = await this.emailModel.deleteOne({ email });
+          console.log(deleteAuth);
+        }
+      } catch (error) {}
+    }, 240000);
 
     return result;
   }

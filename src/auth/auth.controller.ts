@@ -69,9 +69,16 @@ export class AuthController {
     return await this.authService.validCheck(auth.type, auth.val);
   }
 
-  @Post('email')
+  // 이메일 인증번호 생성, 전송
+  @Post('create-auth')
   @HttpCode(200)
-  async createMailAuth(@Body() auth: any) {
-    return await this.authService.createMailAuth(auth.email, auth.name);
+  async createMailAuth(@Body() value: any) {
+    return await this.authService.createMailAuth(value.email, value.name);
+  }
+
+  @Post('check-auth')
+  @HttpCode(200)
+  async emailAuthCheck(@Body() value: any) {
+    return await this.authService.emailAuthCheck(value.email, value.num);
   }
 }

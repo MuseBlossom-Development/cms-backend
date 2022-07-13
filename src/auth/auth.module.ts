@@ -6,12 +6,14 @@ import { JwtService } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { Users } from 'src/entities/users.entity';
 import { ErrorResponse } from 'src/common/error/ErrorResponse';
-import { MailService } from 'src/mail/mail.service';
 import { MailModule } from 'src/mail/mail.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Email, EmailSchema } from 'src/schemas/email.schema';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Users]),
+    MongooseModule.forFeature([{ name: Email.name, schema: EmailSchema }]),
     CacheModule.register(),
     HttpModule,
     MailModule,
