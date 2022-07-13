@@ -13,7 +13,6 @@ export class UserInfo {
   info_id: number;
 
   @OneToOne(() => Users)
-  @JoinColumn()
   user_id: Users;
 
   @Column()

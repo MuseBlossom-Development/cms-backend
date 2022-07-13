@@ -6,43 +6,31 @@ import { UserInfo } from './userinfo.entity';
   expression: (dataSource: DataSource) =>
     dataSource
       .createQueryBuilder()
-      .select('u.user_id', 'id')
-      .addSelect('info.business_number', 'business_number')
-      .addSelect('u.company_name', 'company_name')
-      .addSelect('u.tier', 'tier')
-      .addSelect('info.manager', 'manager')
+      .select('info.business_number', 'com_num')
+      .addSelect('u.company_name', 'com_name')
       .addSelect('u.email', 'email')
-      .addSelect('info.contact_info', 'contact_info')
-      .addSelect('u.subscription', 'subscription')
+      .addSelect('u.tier', 'tier')
       .addSelect('u.create_at', 'create_at')
-      .from(UserInfo, 'info')
-      .leftJoin(Users, 'u', 'u.user_id = info.user_id'),
+      .addSelect('u.subscription', 'subscription')
+      .from(Users, 'u')
+      .leftJoin(UserInfo, 'info', 'u.userInfo = info.info_id'),
 })
 export class UserView {
   @ViewColumn()
-  id: string;
+  com_num: string;
 
   @ViewColumn()
-  business_number: string;
-
-  @ViewColumn()
-  company_name: string;
-
-  @ViewColumn()
-  tier: number;
-
-  @ViewColumn()
-  manager: string;
+  com_name: string;
 
   @ViewColumn()
   email: string;
 
   @ViewColumn()
-  contact_info: string;
+  create_at: Date;
+
+  @ViewColumn()
+  tier: number;
 
   @ViewColumn()
   subscription: Date;
-
-  @ViewColumn()
-  create_at: Date;
 }

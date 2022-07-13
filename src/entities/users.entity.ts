@@ -6,11 +6,13 @@ import {
   Index,
   JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 import { Downloads } from './downloads.entity';
 import { Notice } from './notice.entity';
 import { createHmac } from 'crypto';
+import { UserInfo } from './userinfo.entity';
 
 @Entity()
 @Index(['user_id', 'email'], { unique: true })
@@ -48,4 +50,8 @@ export class Users {
 
   @OneToMany(() => Downloads, (download) => download.user)
   download: Downloads[];
+
+  @OneToOne(() => UserInfo)
+  @JoinColumn()
+  userInfo: UserInfo;
 }
