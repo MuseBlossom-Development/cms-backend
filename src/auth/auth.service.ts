@@ -139,8 +139,12 @@ export class AuthService {
         .where('email = :check', { check: email })
         .getOne();
 
-      if (findEmail !== null) return false;
-      else return true;
+      console.log(findEmail);
+      if (findEmail !== null) {
+        return false;
+      } else {
+        return true;
+      }
     } catch (error) {
       return true;
     }
@@ -261,6 +265,11 @@ export class AuthService {
 
       case 'email':
         truthy = await this.emailCheck(value);
+        result.success = truthy;
+        result.message =
+          truthy === true
+            ? '사용할 수 있는 이메일입니다.'
+            : '사용할 수 없는 이메일입니다.';
         break;
 
       default:
