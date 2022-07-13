@@ -161,6 +161,9 @@ export class AuthService {
         findMailAuth.auth_num === num
           ? '인증이 완료됐습니다.'
           : '다시 시도해 주세요';
+
+      await this.emailModel.deleteOne({ email });
+
       return result;
     } catch (error) {
       console.log('error:', error);
