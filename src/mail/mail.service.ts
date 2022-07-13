@@ -31,7 +31,7 @@ export class MailService {
       console.log('메일 인증 보냄');
       await this.mailerService.sendMail({
         to: email,
-        subject: '',
+        subject: '[ 뮤즈블라썸 ] 회원가입 이메일 인증번호',
         template: './authMailCheck',
         context: {
           name,
