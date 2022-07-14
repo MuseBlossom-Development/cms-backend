@@ -150,7 +150,7 @@ export class AuthService {
     }
   }
 
-  // 이메일 인증 코드 검사
+  // 이메일 인증 번호 검사
   async emailAuthCheck(email: string, num: string) {
     const result = {
       status: 200,
@@ -158,7 +158,10 @@ export class AuthService {
       success: true,
     };
     try {
-      const findMailAuth = await this.emailModel.findOne({ email });
+      const findMailAuth = await this.emailModel.findOne({
+        email,
+        auth_num: num,
+      });
 
       result.success = findMailAuth.auth_num === num ? true : false;
       result.message =
@@ -166,7 +169,7 @@ export class AuthService {
           ? '인증이 완료됐습니다.'
           : '다시 시도해 주세요';
 
-      await this.emailModel.deleteOne({ email });
+      await this.emailModel.deleteOne({ email, auth_num: num });
 
       return result;
     } catch (error) {
