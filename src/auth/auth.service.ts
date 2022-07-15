@@ -1,120 +1,29 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LoginDTO } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { SignOutDTO } from './dto/signout.DTO';
 import { HttpService } from '@nestjs/axios';
-import { createHmac } from 'crypto';
 import { Users } from 'src/entities/users.entity';
 import { ErrorResponse } from 'src/common/error/ErrorResponse';
 import { MailService } from 'src/mail/mail.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Email, EmailDocument } from 'src/schemas/email.schema';
 import { Model } from 'mongoose';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Users) private usersRepository: Repository<Users>,
+    @Inject(MailService) private mailService: MailService,
+    @InjectModel(Email.name) private emailModel: Model<EmailDocument>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
     private readonly errorResponse: ErrorResponse,
-    @Inject(MailService) private mailService: MailService,
-    @InjectModel(Email.name) private emailModel: Model<EmailDocument>,
   ) {}
-
-  // 로그인
-  async signIn(loginInfo: LoginDTO) {
-    const result = {
-      status: 200,
-      success: false,
-      refreshToken: '',
-      accessToken: '',
-      message: '',
-    };
-
-    try {
-      const user: any = await this.usersRepository
-        .createQueryBuilder('user')
-        .where('user.user_id=:id', { id: loginInfo.id })
-        .getOne();
-
-      if (user !== null) {
-        // const truthy = await bcrypt.compare(loginInfo.password, user.password);
-        const truthy =
-          createHmac('sha256', process.env.PW_SECRET_KEY)
-            .update(loginInfo.password)
-            .digest('hex') === user.password
-            ? true
-            : false;
-
-        result.success = truthy;
-
-        if (truthy) {
-          const payload = {
-            id: user.id,
-            tier: user.tier,
-            name: user.company_name,
-          };
-
-          result.status = 200;
-          result.refreshToken = this.jwtService.sign(payload, {
-            secret: process.env.JWT_REFRESH_TOKEN_SECRET,
-            expiresIn: `${process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME}s`,
-          });
-          result.accessToken = this.jwtService.sign(payload, {
-            secret: process.env.JWT_ACCESS_TOKEN_SECRET,
-            expiresIn: `${process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME}s`,
-          });
-        }
-      }
-    } catch (error) {
-      console.log('error:', error);
-      this.errorResponse.BadRequest('id 또는 password가 일치하지 않습니다.');
-    }
-
-    if (!result.success) {
-      this.errorResponse.BadRequest('id 또는 password가 일치하지 않습니다.');
-    }
-
-    result.message = 'online';
-    return result;
-  }
-
-  //회원가입
-  async signUp(userInfo: SignOutDTO, userCheck?: boolean) {
-    const result = {
-      statusCode: 201,
-      success: true,
-      message: `${userInfo.company_name}님, 회원가입을 축하합니다. 새로운 아이디는 ${userInfo.user_id}입니다.`,
-    };
-
-    userCheck = await this.userCheck(userInfo.user_id);
-
-    if (!userCheck) {
-      this.errorResponse.BadRequest('아이디 중복 확인을 해주세요.');
-    }
-
-    const pwCheck = userInfo.password === userInfo.passwordCheck ? true : false;
-
-    if (userCheck && pwCheck) {
-      try {
-        const user = this.usersRepository.create(userInfo);
-        console.log(user);
-        const addUser = await this.usersRepository.save(user);
-        console.log(addUser);
-
-        result.success = true;
-      } catch (error) {
-        console.log('error:', error);
-
-        this.errorResponse.Internal_Server();
-      }
-    }
-
-    return result;
-  }
+  private readonly secretAccess = process.env.JWT_ACCESS_TOKEN_SECRET;
+  private readonly secretRefresh = process.env.JWT_REFRESH_TOKEN_SECRET;
 
   // 아이디 중복 확인
   async userCheck(user_id: string) {
@@ -222,14 +131,6 @@ export class AuthService {
     return result;
   }
 
-  // 토큰 유효성 검사 (임시)
-  async tokenCheck(access, refresh) {
-    const secret = process.env.PW_SECRET_KEY;
-    const refreshVerify = this.jwtService.decode(refresh);
-
-    return true;
-  }
-
   // 중복, 유효성 인증 검사
   async validCheck(checkType, value: any) {
     const result = {
@@ -303,5 +204,102 @@ export class AuthService {
     }, 240000);
 
     return result;
+  }
+
+  // 토큰 유효성 검사
+  async validateToken(
+    token: string,
+    secret: string,
+    t: string,
+  ): Promise<boolean> {
+    try {
+      this.jwtService.verify(token, { secret });
+      const decode: any = this.jwtService.decode(token);
+      const { refreshToken, accessToken: accessToken } =
+        await this.cacheManager.get(decode.id);
+      if (t === 'refresh') {
+        if (refreshToken === null) {
+          this.errorResponse.Unauthorized(
+            '로그인 후 이용할 수 있는 서비스입니다.',
+          );
+        } else if (refreshToken !== token) {
+          this.cacheManager.reset(decode.id);
+          this.errorResponse.Unauthorized(
+            '다른 PC에서 동일한 계정으로 로그인하여, 로그아웃 처리되었습니다.',
+          );
+        }
+      } else {
+        if (accessToken === null) {
+          this.errorResponse.Unauthorized(
+            '로그인 후 이용할 수 있는 서비스입니다.',
+          );
+        } else if (accessToken !== token) {
+          this.cacheManager.reset(decode.id);
+          this.errorResponse.Unauthorized(
+            '다른 PC에서 동일한 계정으로 로그인하여, 로그아웃 처리되었습니다.',
+          );
+        }
+      }
+
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // 토큰 캐시 저장
+  async saveToken(key: string, value: any): Promise<boolean> {
+    let result: boolean;
+
+    try {
+      const saveCache = await this.cacheManager.set(key, value, { ttl: 1000 });
+      console.log('saveCache:', saveCache);
+    } catch (error) {
+      console.log(error);
+    }
+    return result;
+  }
+
+  // 토큰 재발행
+  async createNewToken(token: string) {
+    token = token.split(' ')[1];
+    const verify = this.validateToken(token, this.secretAccess, 'access');
+
+    if (!verify) {
+      const decode: any = this.jwtService.decode(token);
+      // const tokenExp = new Date(decode['exp'] * 1000);
+      // const now = new Date();
+      // const tokenLifeTime = Math.floor(
+      //   (tokenExp.getTime() - now.getTime()) / 1000 / 60,
+      // );
+      // console.log(decode);
+      const payload = {
+        id: decode.id,
+        tier: decode.tier,
+        name: decode.company_name,
+      };
+      const accessToken = this.jwtService.sign(payload, {
+        secret: this.secretAccess,
+        expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+      });
+      const refreshToken = this.jwtService.sign(payload, {
+        secret: this.secretAccess,
+        expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+      });
+
+      this.saveToken(decode.id, { accessToken, refreshToken });
+      return { isCreate: true, accessToken, refreshToken };
+    }
+
+    // await this.cacheManager.get(decode);
+
+    return { isCreate: false, accessToken: token, refreshToken: '' };
+  }
+
+  deleteToken(token: string) {
+    const decode: any = this.jwtService.decode(token);
+    this.cacheManager.reset(decode.id);
+
+    return true;
   }
 }

@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class ErrorResponse {
+  // constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
   Internal_Server() {
     throw new HttpException(
       {
@@ -19,11 +20,11 @@ export class ErrorResponse {
     );
   }
 
-  Unauthorized() {
+  Unauthorized(error?: string) {
     throw new HttpException(
       {
         status: HttpStatus.UNAUTHORIZED,
-        error: '로그인이 필요한 서비스입니다.',
+        error: error,
         success: false,
       },
       HttpStatus.UNAUTHORIZED,

@@ -18,16 +18,16 @@ async function bootstrap() {
   app.enableCors();
   app.use(helmet());
 
-  const redis = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule,
-    {
-      transport: Transport.REDIS,
-      options: {
-        url: 'redis://localhost:6379',
-      },
-    },
-  );
-  await redis.listen();
+  // const redis = await NestFactory.createMicroservice<MicroserviceOptions>(
+  //   AppModule,
+  //   {
+  //     transport: Transport.REDIS,
+  //     options: {
+  //       url: 'redis://localhost:6379',
+  //     },
+  //   },
+  // );
+  // await redis.listen();
   await app.listen(3000);
 }
 bootstrap();

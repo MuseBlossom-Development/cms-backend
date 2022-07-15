@@ -2,8 +2,8 @@ import { IsAlphanumeric } from 'class-validator';
 
 export class TokenCheckDTO {
   @IsAlphanumeric()
-  accessToken: string;
+  accesstoken: string;
 
   @IsAlphanumeric()
-  refreshToken: string;
+  refreshtoken: string;
 }

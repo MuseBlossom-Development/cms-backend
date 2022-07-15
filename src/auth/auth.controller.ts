@@ -7,13 +7,13 @@ import {
   CACHE_MANAGER,
   Query,
   HttpCode,
+  UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Cache } from 'cache-manager';
-import { login } from './entities/login.entity';
-import { LoginDTO } from './dto/login.dto';
-import { SignOutDTO } from 'src/auth/dto/signout.DTO';
 import { TokenCheckDTO } from './dto/tokenCheck.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -32,33 +32,6 @@ export class AuthController {
     const now = new Date().getTime();
     await this.cacheManager.set<number>('time', now, { ttl: 3 });
     return 'save new time : ' + now;
-  }
-
-  //로그인
-  @Post('login')
-  @HttpCode(200)
-  async login(@Body() loginInfo: LoginDTO): Promise<login | any> {
-    return await this.authService.signIn(loginInfo);
-  }
-
-  // 회원가입
-  @Post('signout')
-  async signUp(
-    @Body() userInfo: SignOutDTO,
-    @Query('idCheck') idCheck: string,
-  ) {
-    const Check = idCheck === 'true' ? true : false;
-    console.log(userInfo);
-    return await this.authService.signUp(userInfo, Check);
-  }
-
-  // 로그인 확인
-  @Post('token')
-  async tokenCheck(@Body() token: TokenCheckDTO) {
-    return await this.authService.tokenCheck(
-      token.accessToken,
-      token.refreshToken,
-    );
   }
 
   // 중복, 인증
@@ -80,5 +53,13 @@ export class AuthController {
   @HttpCode(200)
   async emailAuthCheck(@Body() value: any) {
     return await this.authService.emailAuthCheck(value.email, value.num);
+  }
+
+  // 토큰 Guard Test API
+  @Get('token')
+  @UseGuards(JwtAuthGuard)
+  async tokenCheck(@Headers() header: TokenCheckDTO) {
+    // console.log(header);
+    return this.authService.createNewToken(header.refreshtoken);
   }
 }
