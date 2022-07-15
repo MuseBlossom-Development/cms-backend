@@ -1,10 +1,10 @@
-import { IsAlphanumeric, IsBoolean, IsEmail, Length } from 'class-validator';
+import { IsAlphanumeric, IsEmail, Length } from 'class-validator';
 
 export class SignOutDTO {
   @IsAlphanumeric()
   user_id: string;
 
-  @Length(11, 20)
+  @Length(8, 20)
   @IsAlphanumeric()
   password: string;
 

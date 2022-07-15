@@ -1,20 +1,32 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Post, Body, Patch, Query, HttpCode } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ContractInfoDTO } from './dto/contractInfo.dto';
 import { UserInfoUpdateDTO } from './dto/userInfoUpdata.dto';
+import { LoginDTO } from './dto/login.dto';
+import { SignOutDTO } from './dto/signout.DTO';
+import { login } from './entities/login.entity';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  //로그인
+  @Post('login')
+  @HttpCode(200)
+  async login(@Body() loginInfo: LoginDTO): Promise<login | any> {
+    return await this.userService.signIn(loginInfo);
+  }
+
+  // 회원가입
+  @Post('signup')
+  async signUp(
+    @Body() userInfo: SignOutDTO,
+    @Query('idCheck') idCheck: string,
+  ) {
+    const Check = idCheck === 'true' ? true : false;
+    console.log(userInfo);
+    return await this.userService.signUp(userInfo, Check);
+  }
 
   // 계약
   @Post('accept')

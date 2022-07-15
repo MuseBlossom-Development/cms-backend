@@ -7,9 +7,14 @@ import { UserInfo } from 'src/entities/userinfo.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserView } from 'src/entities/userView.entity';
 import { ErrorResponse } from 'src/common/error/ErrorResponse';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Users, UserInfo, UserView]), AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([Users, UserInfo, UserView]),
+    AuthModule,
+    JwtModule.register({ secret: process.env.JWT_TOKEN_SECRET }),
+  ],
   controllers: [UserController],
   providers: [UserService, ErrorResponse],
 })

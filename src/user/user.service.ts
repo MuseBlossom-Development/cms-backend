@@ -6,6 +6,11 @@ import { Repository } from 'typeorm';
 import { ContractInfoDTO } from './dto/contractInfo.dto';
 import { UserInfoUpdateDTO } from './dto/userInfoUpdata.dto';
 import { ErrorResponse } from 'src/common/error/ErrorResponse';
+import { createHmac } from 'crypto';
+import { LoginDTO } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import { AuthService } from './../auth/auth.service';
+import { SignOutDTO } from './dto/signout.DTO';
 
 @Injectable()
 export class UserService {
@@ -14,7 +19,115 @@ export class UserService {
     @InjectRepository(UserInfo)
     private userInfoRepository: Repository<UserInfo>,
     private readonly errorResponse: ErrorResponse,
+    private jwtService: JwtService,
+    private authService: AuthService,
   ) {}
+  private readonly secretAccess = process.env.JWT_ACCESS_TOKEN_SECRET;
+  private readonly secretRefresh = process.env.JWT_REFRESH_TOKEN_SECRET;
+
+  // 로그인
+  async signIn(loginInfo: LoginDTO) {
+    const result = {
+      status: 200,
+      success: false,
+      refreshToken: '',
+      accessToken: '',
+      message: '',
+    };
+
+    try {
+      const user: any = await this.usersRepository
+        .createQueryBuilder('user')
+        .where('user.user_id=:id', { id: loginInfo.id })
+        .getOne();
+
+      if (user !== null) {
+        // const truthy = await bcrypt.compare(loginInfo.password, user.password);
+        const truthy =
+          createHmac('sha256', process.env.PW_SECRET_KEY)
+            .update(loginInfo.password)
+            .digest('hex') === user.password
+            ? true
+            : false;
+
+        result.success = truthy;
+
+        if (truthy) {
+          const payload = {
+            id: user.user_id,
+            tier: user.tier,
+            name: user.company_name,
+          };
+
+          result.status = 200;
+          result.refreshToken =
+            'Bearer ' +
+            this.jwtService.sign(payload, {
+              secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+              expiresIn: `${process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`,
+            });
+          result.accessToken =
+            'Bearer ' +
+            this.jwtService.sign(payload, {
+              secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+              expiresIn: `${process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME}`,
+            });
+
+          // const tokens = `${result.refreshToken}, ${result.accessToken}`;
+          const tokens = {
+            refreshToken: result.refreshToken,
+            accessToken: result.accessToken,
+          };
+
+          this.authService.saveToken(loginInfo.id, tokens);
+        }
+      }
+    } catch (error) {
+      console.log('error:', error);
+      this.errorResponse.BadRequest('id 또는 password가 일치하지 않습니다.');
+    }
+
+    if (!result.success) {
+      this.errorResponse.BadRequest('id 또는 password가 일치하지 않습니다.');
+    }
+
+    result.message = 'online';
+    return result;
+  }
+
+  //회원가입
+  async signUp(userInfo: SignOutDTO, userCheck?: boolean) {
+    const result = {
+      statusCode: 201,
+      success: true,
+      message: `${userInfo.company_name}님, 회원가입을 축하합니다. 새로운 아이디는 ${userInfo.user_id}입니다.`,
+    };
+
+    userCheck = await this.authService.userCheck(userInfo.user_id);
+
+    if (!userCheck) {
+      this.errorResponse.BadRequest('아이디 중복 확인을 해주세요.');
+    }
+
+    const pwCheck = userInfo.password === userInfo.passwordCheck ? true : false;
+
+    if (userCheck && pwCheck) {
+      try {
+        const user = this.usersRepository.create(userInfo);
+        console.log(user);
+        const addUser = await this.usersRepository.save(user);
+        console.log(addUser);
+
+        result.success = true;
+      } catch (error) {
+        console.log('error:', error);
+
+        this.errorResponse.Internal_Server();
+      }
+    }
+
+    return result;
+  }
 
   // 계약 진행 전 회사 정보 입력
   async acceptContract(info: ContractInfoDTO) {
@@ -91,6 +204,26 @@ export class UserService {
       default:
         break;
     }
+    return result;
+  }
+
+  async logout(token: string) {
+    const result = {
+      status: 200,
+      message: '로그아웃',
+      success: true,
+    };
+
+    const valid = this.authService.validateToken(
+      token.split(', ')[1],
+      this.secretRefresh,
+      'refresh',
+    );
+
+    if (valid) {
+      this.authService.deleteToken(token);
+    }
+
     return result;
   }
 }
