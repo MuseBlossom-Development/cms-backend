@@ -32,6 +32,9 @@ export class Users {
   @Column()
   email: string;
 
+  @Column({ default: false })
+  isEmail: boolean;
+
   @Column({ default: null })
   subscription?: Date;
 

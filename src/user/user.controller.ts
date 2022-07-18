@@ -1,10 +1,21 @@
-import { Controller, Post, Body, Patch, Query, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Patch,
+  Query,
+  HttpCode,
+  Get,
+  UseGuards,
+  Headers,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { ContractInfoDTO } from './dto/contractInfo.dto';
 import { UserInfoUpdateDTO } from './dto/userInfoUpdata.dto';
 import { LoginDTO } from './dto/login.dto';
 import { SignOutDTO } from './dto/signout.DTO';
 import { login } from './entities/login.entity';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -42,5 +53,11 @@ export class UserController {
   ) {
     // console.log(id, updata);
     return await this.userService.userInfoUpDate(id, update);
+  }
+
+  @Get('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Headers() req: any) {
+    return this.userService.logout(req.refreshtoken);
   }
 }

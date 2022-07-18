@@ -32,6 +32,7 @@ export class UserService {
       success: false,
       refreshToken: '',
       accessToken: '',
+      isEmail: false,
       message: '',
     };
 
@@ -73,10 +74,14 @@ export class UserService {
               expiresIn: `${process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME}`,
             });
 
+          result.isEmail = user.isEmail;
+
           // const tokens = `${result.refreshToken}, ${result.accessToken}`;
+          const saveAcToken = result.accessToken.split(' ')[1];
+          const saveReToken = result.refreshToken.split(' ')[1];
           const tokens = {
-            refreshToken: result.refreshToken,
-            accessToken: result.accessToken,
+            refreshToken: saveReToken,
+            accessToken: saveAcToken,
           };
 
           this.authService.saveToken(loginInfo.id, tokens);
@@ -101,6 +106,11 @@ export class UserService {
       statusCode: 201,
       success: true,
       message: `${userInfo.company_name}님, 회원가입을 축하합니다. 새로운 아이디는 ${userInfo.user_id}입니다.`,
+      user: {
+        refreshToken: '',
+        accessToken: '',
+        isEmail: false,
+      },
     };
 
     userCheck = await this.authService.userCheck(userInfo.user_id);
@@ -125,6 +135,15 @@ export class UserService {
         this.errorResponse.Internal_Server();
       }
     }
+
+    const login = { id: userInfo.user_id, password: userInfo.password };
+    const user = await this.signIn(login);
+
+    result.user = {
+      refreshToken: user.refreshToken,
+      accessToken: user.accessToken,
+      isEmail: user.isEmail,
+    };
 
     return result;
   }
