@@ -79,6 +79,12 @@ export class AuthService {
           : '다시 시도해 주세요';
 
       await this.emailModel.deleteOne({ email, auth_num: num });
+      await this.usersRepository
+        .createQueryBuilder()
+        .update()
+        .set({ isEmail: true })
+        .where('email = :email', { email })
+        .execute();
 
       return result;
     } catch (error) {
@@ -212,20 +218,23 @@ export class AuthService {
     secret: string,
     t: string,
   ): Promise<boolean> {
+    // console.log('token type', t);
     try {
       this.jwtService.verify(token, { secret });
       const decode: any = this.jwtService.decode(token);
-      const { refreshToken, accessToken: accessToken } =
-        await this.cacheManager.get(decode.id);
+      const { refreshToken, accessToken } = await this.cacheManager.get(
+        decode.id,
+      );
+
       if (t === 'refresh') {
         if (refreshToken === null) {
           this.errorResponse.Unauthorized(
             '로그인 후 이용할 수 있는 서비스입니다.',
           );
         } else if (refreshToken !== token) {
-          this.cacheManager.reset(decode.id);
+          this.cacheManager.del(decode.id);
           this.errorResponse.Unauthorized(
-            '다른 PC에서 동일한 계정으로 로그인하여, 로그아웃 처리되었습니다.',
+            '다른 PC에서 동일한 계정으로 로그인하여, 로그아웃 처리되었습니다.1',
           );
         }
       } else {
@@ -234,15 +243,16 @@ export class AuthService {
             '로그인 후 이용할 수 있는 서비스입니다.',
           );
         } else if (accessToken !== token) {
-          this.cacheManager.reset(decode.id);
+          // this.cacheManager.del(decode.id);
           this.errorResponse.Unauthorized(
-            '다른 PC에서 동일한 계정으로 로그인하여, 로그아웃 처리되었습니다.',
+            '다른 PC에서 동일한 계정으로 로그인하여, 로그아웃 처리되었습니다.2',
           );
         }
       }
 
       return true;
     } catch (error) {
+      console.log('유효하지 않는 토큰 에러', error);
       return false;
     }
   }
@@ -255,7 +265,8 @@ export class AuthService {
       const saveCache = await this.cacheManager.set(key, value, { ttl: 1000 });
       console.log('saveCache:', saveCache);
     } catch (error) {
-      console.log(error);
+      console.log('토큰 저장 에러', error);
+      this.errorResponse.Internal_Server();
     }
     return result;
   }
@@ -263,6 +274,7 @@ export class AuthService {
   // 토큰 재발행
   async createNewToken(token: string) {
     token = token.split(' ')[1];
+    console.log('create New Token', token);
     const verify = this.validateToken(token, this.secretAccess, 'access');
 
     if (!verify) {
@@ -272,7 +284,7 @@ export class AuthService {
       // const tokenLifeTime = Math.floor(
       //   (tokenExp.getTime() - now.getTime()) / 1000 / 60,
       // );
-      // console.log(decode);
+      console.log(decode);
       const payload = {
         id: decode.id,
         tier: decode.tier,
@@ -288,17 +300,31 @@ export class AuthService {
       });
 
       this.saveToken(decode.id, { accessToken, refreshToken });
-      return { isCreate: true, accessToken, refreshToken };
+      return {
+        isCreate: true,
+        accessToken: 'Bearer ' + accessToken,
+        refreshToken: 'Bearer ' + refreshToken,
+      };
     }
 
     // await this.cacheManager.get(decode);
 
-    return { isCreate: false, accessToken: token, refreshToken: '' };
+    return {
+      isCreate: false,
+      accessToken: 'Bearer ' + token,
+      refreshToken: '',
+    };
   }
 
-  deleteToken(token: string) {
+  async deleteToken(token: string) {
+    token = token.split(' ')[1];
     const decode: any = this.jwtService.decode(token);
-    this.cacheManager.reset(decode.id);
+    // console.log(decode);
+    try {
+      this.cacheManager.del(decode.id);
+    } catch (error) {
+      console.log(error);
+    }
 
     return true;
   }

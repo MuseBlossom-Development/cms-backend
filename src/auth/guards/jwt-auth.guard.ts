@@ -22,11 +22,16 @@ export class JwtAuthGuard implements CanActivate {
     try {
       access = accesstoken.split(' ')[1];
       refresh = refreshtoken.split(' ')[1];
+      // console.log(access);
+      // console.log(refresh);
     } catch (error) {
       this.errorResponse.Forbidden();
     }
 
     try {
+      // console.log('Ref');
+      this.jwtService.verify(refresh, { secret: secretRefresh });
+      // console.log('Ac');
       this.jwtService.verify(access, { secret: secretAccess });
     } catch (error) {
       const verify = await this.authService.validateToken(

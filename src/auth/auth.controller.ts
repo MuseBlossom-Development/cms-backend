@@ -5,7 +5,6 @@ import {
   Body,
   Inject,
   CACHE_MANAGER,
-  Query,
   HttpCode,
   UseGuards,
   Headers,
@@ -44,6 +43,7 @@ export class AuthController {
 
   // 이메일 인증번호 생성, 전송
   @Post('create-auth')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(200)
   async createMailAuth(@Body() value: any) {
     return await this.authService.createMailAuth(value.email, value.name);
@@ -59,7 +59,7 @@ export class AuthController {
   @Get('token')
   @UseGuards(JwtAuthGuard)
   async tokenCheck(@Headers() header: TokenCheckDTO) {
-    // console.log(header);
-    return this.authService.createNewToken(header.refreshtoken);
+    console.log('Guard pass');
+    return this.authService.createNewToken(header.accesstoken);
   }
 }
