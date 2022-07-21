@@ -28,7 +28,6 @@ export class MailService {
     try {
       await this.emailModel.create(createEmailAuth);
 
-      console.log('메일 인증 보냄');
       await this.mailerService.sendMail({
         to: email,
         subject: '[ 뮤즈블라썸 ] 회원가입 이메일 인증번호',
@@ -38,6 +37,7 @@ export class MailService {
           num: createEmailAuth.auth_num,
         },
       });
+      console.log('메일 인증 보냄');
     } catch (error) {
       console.log(error);
       this.errorResponse.Internal_Server();
