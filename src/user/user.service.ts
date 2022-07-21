@@ -56,6 +56,7 @@ export class UserService {
         if (truthy) {
           const payload = {
             id: user.user_id,
+            email: user.email,
             tier: user.tier,
             name: user.company_name,
           };
