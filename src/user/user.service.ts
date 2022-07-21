@@ -66,13 +66,13 @@ export class UserService {
             'Bearer ' +
             this.jwtService.sign(payload, {
               secret: process.env.JWT_REFRESH_TOKEN_SECRET,
-              expiresIn: `${process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`,
+              expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
             });
           result.accessToken =
             'Bearer ' +
             this.jwtService.sign(payload, {
               secret: process.env.JWT_ACCESS_TOKEN_SECRET,
-              expiresIn: `${process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME}`,
+              expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
             });
 
           result.isEmail = user.isEmail;
