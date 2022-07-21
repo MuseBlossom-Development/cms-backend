@@ -10,6 +10,14 @@ async function bootstrap() {
     .setTitle('CMS API')
     .setDescription('CMS API 개발')
     .setVersion('0.0.1')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'Token',
+      },
+      'access-token',
+    )
     .addTag('CMS')
     .build();
   const document = SwaggerModule.createDocument(app, config);
