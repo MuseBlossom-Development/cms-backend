@@ -207,7 +207,7 @@ export class AuthService {
           console.log(deleteAuth);
         }
       } catch (error) {}
-    }, 240000);
+    }, 300000);
 
     return result;
   }
