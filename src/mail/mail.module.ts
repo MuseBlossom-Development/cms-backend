@@ -15,9 +15,9 @@ import { join } from 'path';
         // transport: 'smtps://user@example.com:topsecret@smtp.example.com',
         transport: {
           service: 'Daum',
-          host: 'smtp.daum.net',
-          port: 465,
-          secure: true, // port 465 true
+          host: process.env.MAIL_HOST,
+          port: +process.env.MAIL_PORT,
+          secure: true, // port 456 true
           auth: {
             user: process.env.MAIL_AUTH_USER,
             pass: process.env.MAIL_AUTH_PASS,
