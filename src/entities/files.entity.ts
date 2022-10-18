@@ -23,7 +23,7 @@ export class Files {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ default: null })
   file_url: string;
 
   @Column()
@@ -42,6 +42,9 @@ export class Files {
   mood: string;
 
   @Column({ default: null })
+  tempo: string;
+
+  @Column({ default: null })
   genre: string;
 
   @Column({ default: null })
@@ -56,8 +59,8 @@ export class Files {
   @CreateDateColumn()
   create_at: Date;
 
-  @ManyToOne(() => Wait, (wait) => wait.file_id)
-  wait: Wait;
+  @OneToMany(() => Wait, (wait) => wait.file_id)
+  wait: Wait[];
 
   @OneToMany(() => Downloads, (down) => down.file_id)
   down: Downloads;
