@@ -216,17 +216,17 @@ export class AuthService {
   async validateToken(
     token: string,
     secret: string,
-    t: string,
+    tokenType: string,
   ): Promise<boolean> {
     // console.log('token type', t);
     try {
       this.jwtService.verify(token, { secret });
       const decode: any = this.jwtService.decode(token);
-      const { refreshToken, accessToken } = await this.cacheManager.get(
+      const { refreshToken, accessToken }: any = await this.cacheManager.get(
         decode.id,
       );
 
-      if (t === 'refresh') {
+      if (tokenType === 'refresh') {
         if (refreshToken === null) {
           this.errorResponse.Unauthorized(
             '로그인 후 이용할 수 있는 서비스입니다.',
@@ -234,18 +234,13 @@ export class AuthService {
         } else if (refreshToken !== token) {
           this.cacheManager.del(decode.id);
           this.errorResponse.Unauthorized(
-            '다른 PC에서 동일한 계정으로 로그인하여, 로그아웃 처리되었습니다.1',
+            '다른 PC에서 동일한 계정으로 로그인하여, 로그아웃 처리되었습니다.',
           );
         }
       } else {
         if (accessToken === null) {
           this.errorResponse.Unauthorized(
             '로그인 후 이용할 수 있는 서비스입니다.',
-          );
-        } else if (accessToken !== token) {
-          // this.cacheManager.del(decode.id);
-          this.errorResponse.Unauthorized(
-            '다른 PC에서 동일한 계정으로 로그인하여, 로그아웃 처리되었습니다.2',
           );
         }
       }

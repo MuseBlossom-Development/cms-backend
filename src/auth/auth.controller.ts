@@ -1,17 +1,14 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Inject,
   CACHE_MANAGER,
   HttpCode,
   UseGuards,
-  Headers,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Cache } from 'cache-manager';
-import { TokenCheckDTO } from './dto/tokenCheck.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
