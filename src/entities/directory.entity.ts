@@ -10,12 +10,12 @@ import { Files } from './files.entity';
 
 @Entity()
 export class Directory {
-  @OneToMany(() => Directory, (dir) => dir.top_directory_id)
+  @OneToMany(() => Directory, (dir) => dir.top_dir_id)
   @PrimaryGeneratedColumn()
   directory_id: Directory[];
 
   @ManyToOne(() => Directory, (dir) => dir.directory_id)
-  top_directory_id: Directory;
+  top_dir_id: Directory;
 
   @Column()
   title: string;

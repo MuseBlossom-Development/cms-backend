@@ -12,11 +12,11 @@ export class Downloads {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   d_id: number;
 
-  @ManyToOne(() => Users, (user) => user.download)
+  @ManyToOne(() => Users, (user) => user.user_id)
   user: Users;
 
-  @ManyToOne(() => Files, (file) => file.down)
-  file_id: number;
+  @ManyToOne(() => Files, (file) => file.file_id)
+  file_id: Files;
 
   @CreateDateColumn()
   download_date: Date;
