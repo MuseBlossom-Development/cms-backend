@@ -6,12 +6,22 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { FileService } from './file.service';
-import { CreateFileDto } from './dto/create-file.dto';
-import { UpdateFileDto } from './dto/update-file.dto';
 
 @Controller('file')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
+
+  @Get('view/:nowFile')
+  async fileView(
+    @Param('nowFile') nowFile: string,
+    @Query('next') nextFile: string,
+  ) {
+    if (nextFile) {
+      return await this.fileService.fileView(nowFile, nextFile);
+    }
+    return await this.fileService.fileView(nowFile);
+  }
 }
