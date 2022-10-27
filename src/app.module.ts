@@ -24,7 +24,8 @@ import { MongoConfigService } from './config/databases/MongoConfig.service';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.NODE_MOD === 'dev' ? '.env.dev' : '.env.prod',
+      envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.prod',
+      ignoreEnvFile: process.env.NODE_ENV === 'prod',
       load: [dbConfig],
     }),
     TypeOrmModule.forRootAsync({
