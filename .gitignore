@@ -37,4 +37,6 @@ lerna-debug.log*
 # 기타
 /use-data
 .env
+.env.dev
+.env.prod
 ecosystem.config.js
