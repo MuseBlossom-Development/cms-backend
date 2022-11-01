@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -13,11 +12,8 @@ export class Notice {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   notice_no: number;
 
-  @ManyToOne((type) => Users, (user) => user.notice)
+  @ManyToOne(() => Users, (user) => user.notice)
   user: Users;
-
-  @Column()
-  notice_key: string;
 
   @Column()
   title: string;
